@@ -1,21 +1,14 @@
----
-output:
-  html_document:
-    keep_md: yes
----
 
 
 # Reproducible Research: Peer Assessment 1
 
 
 
-```{r,echo=F,message=F,results=F}
-library(dplyr)
-library(lattice)
-```
+
 
 ##Loading and preprocessing the data
-```{r,echo=TRUE}
+
+```r
 setwd("C:/Users/rohit/Desktop/Coursera Data Science Specialization/Reproducible Research")
 activity_data=read.csv("activity.csv")
 
@@ -27,7 +20,8 @@ remove_na=activity_data[complete.cases(activity_data),]
 
 
 Plotting Histogram:
-```{r,echo=TRUE}
+
+```r
 sum1=aggregate(remove_na$steps, by=list(remove_na$date), FUN=sum)
 names(sum1)=c("date","sum_of_steps")
 
@@ -35,18 +29,29 @@ hist(sum1$sum_of_steps, col="light pink", main="Histogram of steps per day", xla
 abline(v=mean(sum1$sum_of_steps), lwd=2, col="red")
 abline(v=median(sum1$sum_of_steps), lwd=2, col="blue")
 legend("topright",c("mean", "median"), cex=0.8, col=c("red", "blue"), lwd=c(2,2), bty="n")
-
 ```
+
+![](./PA1_template_files/figure-html/unnamed-chunk-3-1.png) 
 
 
 ##Mean total number of steps taken per day:*
-```{r}
+
+```r
 mean(sum1$sum_of_steps, na.rm=T)
 ```
 
+```
+## [1] 10766.19
+```
+
 *Median total number of steps taken per day*
-```{r}
+
+```r
 median(sum1$sum_of_steps, na.rm=T)
+```
+
+```
+## [1] 10765
 ```
 
 
@@ -54,7 +59,8 @@ median(sum1$sum_of_steps, na.rm=T)
 
 Make a time series plot (i.e. type = "l") of the 5-minute interval (x-axis) and the average number of steps taken, averaged across all days (y-axis)
 
-```{r,echo=T}
+
+```r
 mean=aggregate(remove_na$steps, list(remove_na$interval), mean)
 names(mean)=c("interval", "avg_steps")
 
@@ -66,29 +72,44 @@ abline(v=subset(mean, mean$avg_steps==max(mean$avg_steps), select="interval"), c
 legend("topright",c("interval with max average steps"), cex=0.8, col="red", lwd=c(2,2), bty="n")
 ```
 
+![](./PA1_template_files/figure-html/unnamed-chunk-6-1.png) 
+
 Which 5-minute interval, on average across all the days in the dataset, contains the maximum number of steps?
-```{r}
+
+```r
 subset(mean, mean$avg_steps==max(mean$avg_steps), select=c("interval","avg_steps"))
+```
+
+```
+##     interval avg_steps
+## 104      835  206.1698
 ```
 
 
 ##Imputing missing values
 
 Calculate and report the total number of missing values in the dataset (i.e. the total number of rows with NAs)
-```{r}
+
+```r
 sum(!complete.cases(activity_data))
+```
+
+```
+## [1] 2304
 ```
 
 
 Assigning mean for the 5 min interval corresponding to missing values in the dataset. 
-```{r}
+
+```r
 a=activity_data[is.na(activity_data$steps),]
 new_data=merge(select(a,date, interval),mean, by="interval" )
 new_data=rbind(select(new_data, steps=avg_steps, date, interval), remove_na)
 ```
 
 *Plotting Histogram for new data*
-```{r,echo=TRUE}
+
+```r
 sum2=aggregate(new_data$steps, by=list(new_data$date), FUN=sum)
 names(sum2)=c("date","sum_of_steps")
 
@@ -96,24 +117,36 @@ hist(sum2$sum_of_steps, col="light green", main="Histogram of steps per day", xl
 abline(v=mean(sum2$sum_of_steps), lwd=2, col="red")
 abline(v=median(sum2$sum_of_steps), lwd=2, col="blue")
 legend("topright",c("mean", "median"), cex=0.8, col=c("red", "blue"), lwd=c(2,2), bty="n")
-
 ```
+
+![](./PA1_template_files/figure-html/unnamed-chunk-10-1.png) 
 
 
 *Mean total number of steps taken per day:*
-```{r}
+
+```r
 mean(sum2$sum_of_steps)
 ```
 
+```
+## [1] 10766.19
+```
+
 *Median total number of steps taken per day: is same as the mean calculated above.*
-```{r}
+
+```r
 median(sum2$sum_of_steps)
+```
+
+```
+## [1] 10766.19
 ```
 
 
 Number of days having steps per day in the range of 10K to 15K have increased from ~30 to 35.
 
-```{r}
+
+```r
 par(mfrow=c(1,2))
 
 
@@ -127,8 +160,9 @@ hist(sum2$sum_of_steps, col="light green", main="Histogram of steps per day - Ne
 abline(v=mean(sum2$sum_of_steps), lwd=2, col="red")
 abline(v=median(sum2$sum_of_steps), lwd=2, col="blue")
 legend("topright",c("mean", "median"), cex=0.8, col=c("red", "blue"), lwd=c(2,2), bty="n")
-
 ```
+
+![](./PA1_template_files/figure-html/unnamed-chunk-13-1.png) 
 
 ##Are there differences in activity patterns between weekdays and weekends?
 
@@ -136,7 +170,8 @@ Weekends show higher activity per interval than weekdays.
 
 
 
-```{r}
+
+```r
 a=new_data
 a$date=as.Date(a$date, "%Y-%m-%d")
 a$day=weekdays(a$date,T)
@@ -147,3 +182,5 @@ mean=aggregate(a$steps, list(a$interval,a$day), mean)
 names(mean)=c("interval","day", "avg_steps")
 xyplot(avg_steps~interval|day,data=mean,type="l",layout=c(1,2), main="Weekend vs. Weekday avg steps per interval")
 ```
+
+![](./PA1_template_files/figure-html/unnamed-chunk-14-1.png) 
